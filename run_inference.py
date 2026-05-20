@@ -3,15 +3,24 @@ import os
 from pathlib import Path
 from src.patching import create_image_patches
 
-from src.utils import load_config, create_output_directories, is_supported_image
+from src.utils import (
+    PROJECT_ROOT,
+    load_config,
+    resolve_config_paths,
+    create_output_directories,
+    is_supported_image,
+    resolve_input_path
+)
 
+from src.patching import create_image_patches
+from src.yolo_prompt_generator import YOLOPromptGenerator, save_yolo_prompts
 
 def collect_input_images(input_path, supported_formats):
     """
     Collect image paths from either a single image file or a folder.
     """
 
-    input_path = Path(input_path)
+    input_path = resolve_input_path(input_path)
 
     if input_path.is_file():
         if is_supported_image(str(input_path), supported_formats):
@@ -24,7 +33,7 @@ def collect_input_images(input_path, supported_formats):
 
         for file in input_path.iterdir():
             if file.is_file() and is_supported_image(str(file), supported_formats):
-                image_paths.append(file)
+                image_paths.append(file.resolve())
 
         image_paths = sorted(image_paths)
 
@@ -34,7 +43,6 @@ def collect_input_images(input_path, supported_formats):
         return image_paths
 
     raise FileNotFoundError(f"Input path does not exist: {input_path}")
-
 
 def run_pipeline_for_image(image_path, config, output_folders):
     """
@@ -114,13 +122,16 @@ def main():
 
     parser.add_argument(
         "--config",
-        default="config.yaml",
-        help="Path to config YAML file"
+        default=None,
+        help="Path to config YAML file. If not provided, project-root config.yaml is used."
     )
 
     args = parser.parse_args()
 
+    print(f"Project root: {PROJECT_ROOT}")
+
     config = load_config(args.config)
+    config = resolve_config_paths(config)
 
     output_folders = create_output_directories(args.output)
 
@@ -133,13 +144,23 @@ def main():
 
     print(f"Found {len(image_paths)} image(s) for inference.")
 
+    yolo_config = config["yolo"]
+
+    yolo_prompt_generator = YOLOPromptGenerator(
+        model_path=yolo_config["model_path"],
+        confidence_threshold=yolo_config["confidence_threshold"],
+        iou_threshold=yolo_config["iou_threshold"],
+        image_size=yolo_config["image_size"],
+        device=yolo_config.get("device", "auto"),
+        class_names=config["classes"]
+    )
+
     for image_path in image_paths:
         run_pipeline_for_image(
             image_path=image_path,
             config=config,
-            output_folders=output_folders
+            output_folders=output_folders,
+            yolo_prompt_generator=yolo_prompt_generator
         )
-
-
 if __name__ == "__main__":
     main()
