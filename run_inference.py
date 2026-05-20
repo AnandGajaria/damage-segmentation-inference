@@ -1,6 +1,7 @@
 import argparse
 import os
 from pathlib import Path
+from src.patching import create_image_patches
 
 from src.utils import load_config, create_output_directories, is_supported_image
 
@@ -40,7 +41,7 @@ def run_pipeline_for_image(image_path, config, output_folders):
     Main pipeline for one image.
 
     Current status:
-    - Patching not connected yet
+    - Patching connected
     - YOLO not connected yet
     - SAM not connected yet
     - Unpatching not connected yet
@@ -49,8 +50,39 @@ def run_pipeline_for_image(image_path, config, output_folders):
     print("=" * 80)
     print(f"Processing image: {image_path.name}")
 
+    patch_size = config["patching"]["patch_size"]
+    stride = config["patching"]["stride"]
+    save_patches = config["patching"]["save_patches"]
+
+    patch_output_dir = os.path.join(
+        output_folders["temp"],
+        "patches",
+        image_path.stem
+    )
+
     # Step 1: patching
-    print("[1/4] Patching image... not implemented yet")
+    print("[1/4] Patching image...")
+
+    patches, patch_metadata = create_image_patches(
+        image_path=image_path,
+        patch_size=patch_size,
+        stride=stride,
+        save_patches=save_patches,
+        patch_output_dir=patch_output_dir
+    )
+
+    print(f"Created {len(patches)} patches.")
+    print(
+        f"Original image size: "
+        f"{patch_metadata['original_width']} x {patch_metadata['original_height']}"
+    )
+
+    if len(patches) > 0:
+        first_patch = patches[0]
+        print(
+            f"First patch: {first_patch['patch_name']} "
+            f"at x={first_patch['x_min']}, y={first_patch['y_min']}"
+        )
 
     # Step 2: YOLO prompt generation
     print("[2/4] Running YOLOv8 prompt generation... not implemented yet")
@@ -62,7 +94,6 @@ def run_pipeline_for_image(image_path, config, output_folders):
     print("[4/4] Stitching masks and saving outputs... not implemented yet")
 
     print(f"Finished placeholder pipeline for: {image_path.name}")
-
 
 def main():
     parser = argparse.ArgumentParser(

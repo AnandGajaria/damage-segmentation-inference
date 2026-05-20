@@ -12,7 +12,7 @@ patching:
   patch_size: 512
   stride: 256
   overlap: 256
-  save_patches: false
+  save_patches: true
 
 yolo:
   model_path: "models/yolo/best.pt"
