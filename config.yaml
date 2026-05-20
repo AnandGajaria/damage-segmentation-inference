@@ -26,10 +26,16 @@ sam:
   device: "auto"
 
 classes:
-  0: "Background"
-  1: "Damaged Wall"
-  2: "Damaged Window"
-  3: "Debris"
+  0: "Damaged Wall"
+  1: "Damaged Window"
+  2: "Debris"
+
+mask_encoding:
+  background: 0
+  class_to_pixel_value:
+    0: 1
+    1: 2
+    2: 3
 
 outputs:
   save_full_mask: true

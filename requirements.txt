@@ -1,3 +1,6 @@
 pyyaml
 pillow
 numpy
+ultralytics
+torch
+opencv-python
