@@ -44,7 +44,7 @@ def collect_input_images(input_path, supported_formats):
 
     raise FileNotFoundError(f"Input path does not exist: {input_path}")
 
-def run_pipeline_for_image(image_path, config, output_folders):
+def run_pipeline_for_image(image_path, config, output_folders, yolo_prompt_generator):
     """
     Main pipeline for one image.
 
@@ -93,8 +93,35 @@ def run_pipeline_for_image(image_path, config, output_folders):
         )
 
     # Step 2: YOLO prompt generation
-    print("[2/4] Running YOLOv8 prompt generation... not implemented yet")
+    print("[2/4] Running YOLOv8 prompt generation...")
 
+    yolo_detections = yolo_prompt_generator.predict_patches(patches)
+
+    print(f"YOLO generated {len(yolo_detections)} bounding-box prompts.")
+
+    yolo_prompt_output_path = os.path.join(
+        output_folders["temp"],
+        "yolo_prompts",
+        f"{image_path.stem}_yolo_prompts.json"
+    )
+
+    save_yolo_prompts(
+        image_name=image_path.name,
+        detections=yolo_detections,
+        output_path=yolo_prompt_output_path
+    )
+
+    print(f"YOLO prompts saved to: {yolo_prompt_output_path}")
+
+    if len(yolo_detections) > 0:
+        first_detection = yolo_detections[0]
+
+        print("First YOLO detection:")
+        print(f"  Class ID: {first_detection['class_id']}")
+        print(f"  Class name: {first_detection['class_name']}")
+        print(f"  Confidence: {first_detection['confidence']:.3f}")
+        print(f"  Patch bbox: {first_detection['bbox_patch']}")
+        print(f"  Global bbox: {first_detection['bbox_global']}")
     # Step 3: SAM segmentation
     print("[3/4] Running SAM segmentation... not implemented yet")
 
