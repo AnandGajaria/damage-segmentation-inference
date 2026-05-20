@@ -1,0 +1,45 @@
+project:
+  name: "damage-segmentation-inference"
+  task: "Ground-level infrastructure damage segmentation"
+
+input:
+  supported_formats:
+    - ".jpg"
+    - ".jpeg"
+    - ".png"
+
+patching:
+  patch_size: 512
+  stride: 256
+  overlap: 256
+  save_patches: false
+
+yolo:
+  model_path: "models/yolo/best.pt"
+  confidence_threshold: 0.2
+  iou_threshold: 0.2
+  image_size: 512
+
+sam:
+  model_path: "models/sam/sam_finetuned.pth"
+  model_type: "vit_l"
+  device: "auto"
+
+classes:
+  0: "Background"
+  1: "Damaged Wall"
+  2: "Damaged Window"
+  3: "Debris"
+
+outputs:
+  save_full_mask: true
+  save_overlay: true
+  save_json: true
+  save_patch_outputs: false
+
+output_folders:
+  masks: "outputs/masks"
+  overlays: "outputs/overlays"
+  json: "outputs/json"
+  logs: "outputs/logs"
+  temp: "outputs/temp"
