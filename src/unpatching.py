@@ -11,35 +11,6 @@ def stitch_sam_masks(
     output_mask_path,
     class_to_pixel_value=None
 ):
-    """
-    Stitch patch-level SAM masks back into the original image size.
-
-    Parameters
-    ----------
-    sam_mask_predictions : list
-        Output from SAMSegmenter.segment_patches().
-
-    patch_metadata : dict
-        Metadata returned by create_image_patches().
-
-    output_mask_path : str
-        Path where final full-size mask will be saved.
-
-    class_to_pixel_value : dict
-        Mapping from model class ID to final mask pixel value.
-        Example:
-        {
-            0: 1,  # Damaged Wall
-            1: 2,  # Damaged Window
-            2: 3   # Debris
-        }
-
-    Returns
-    -------
-    full_mask : np.ndarray
-        Full-size categorical mask.
-    """
-
     original_height = patch_metadata["original_height"]
     original_width = patch_metadata["original_width"]
 

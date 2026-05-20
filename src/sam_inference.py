@@ -9,17 +9,6 @@ from transformers import SamModel, SamProcessor
 
 
 class SAMSegmenter:
-    """
-    Runs SAM on image patches using YOLO bounding boxes as prompts.
-
-    Input:
-    - patches from patching.py
-    - YOLO detections from yolo_prompt_generator.py
-
-    Output:
-    - patch-level masks with class IDs preserved from YOLO
-    """
-
     def __init__(
         self,
         base_model_name="facebook/sam-vit-large",
@@ -48,14 +37,6 @@ class SAMSegmenter:
         self.bin_thresh = bin_thresh
 
     def _load_checkpoint(self, checkpoint_path):
-        """
-        Load fine-tuned SAM checkpoint.
-
-        This supports common checkpoint formats:
-        - full model state_dict
-        - dict with 'model_state_dict'
-        - dict with 'state_dict'
-        """
 
         checkpoint_path = Path(checkpoint_path)
 
@@ -96,27 +77,7 @@ class SAMSegmenter:
             print("SAM mask decoder checkpoint loaded.")
 
     def run_sam_on_patch(self, patch_image, bboxes):
-        """
-        Run SAM on one patch using one or more YOLO bounding boxes.
-
-        Parameters
-        ----------
-        patch_image : numpy array
-            RGB patch image, shape H x W x 3.
-
-        bboxes : list
-            List of bounding boxes in patch coordinates:
-            [x1, y1, x2, y2]
-
-        Returns
-        -------
-        all_masks : list
-            Binary masks, each with shape H x W.
-
-        all_scores : list
-            SAM predicted IoU scores.
-        """
-
+    
         if len(bboxes) == 0:
             return [], []
 
@@ -177,21 +138,7 @@ class SAMSegmenter:
         return all_masks, all_scores
 
     def segment_patches(self, patches, yolo_detections):
-        """
-        Run SAM on all patches using YOLO detections.
-
-        Returns a list of mask predictions.
-        Each mask prediction keeps:
-        - patch_id
-        - class_id
-        - class_name
-        - YOLO confidence
-        - SAM IoU score
-        - bbox_patch
-        - bbox_global
-        - mask_patch
-        """
-
+    
         detections_by_patch = defaultdict(list)
 
         for detection in yolo_detections:
@@ -216,9 +163,7 @@ class SAMSegmenter:
                 bboxes=bboxes
             )
 
-            # Because low-quality masks may be filtered out,
-            # we need to align masks with detections carefully.
-            # This version assumes masks are returned in the same order for kept detections.
+            
             kept_index = 0
 
             for detection in patch_detections:

@@ -6,15 +6,6 @@ from ultralytics import YOLO
 
 
 class YOLOPromptGenerator:
-    """
-    Runs YOLOv8 on image patches and converts patch-level detections
-    into original-image coordinates.
-
-    Class IDs are kept as:
-    0 = Damaged Wall
-    1 = Damaged Window
-    2 = Debris
-    """
 
     def __init__(
         self,

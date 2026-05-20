@@ -53,12 +53,6 @@ def collect_input_images(input_path, supported_formats):
 def run_pipeline_for_image(image_path, config, output_folders, yolo_prompt_generator, sam_segmenter):
     """
     Main pipeline for one image.
-
-    Current status:
-    - Patching connected
-    - YOLO not connected yet
-    - SAM not connected yet
-    - Unpatching not connected yet
     """
 
     print("=" * 80)
@@ -75,7 +69,7 @@ def run_pipeline_for_image(image_path, config, output_folders, yolo_prompt_gener
     )
 
     # Step 1: patching
-    print("[1/4] Patching image...")
+    print("Patching image")
 
     patches, patch_metadata = create_image_patches(
         image_path=image_path,
@@ -99,7 +93,7 @@ def run_pipeline_for_image(image_path, config, output_folders, yolo_prompt_gener
         )
 
     # Step 2: YOLO prompt generation
-    print("[2/4] Running YOLOv8 prompt generation...")
+    print("Running YOLOv8 prompt generation")
 
     yolo_detections = yolo_prompt_generator.predict_patches(patches)
 
@@ -118,18 +112,8 @@ def run_pipeline_for_image(image_path, config, output_folders, yolo_prompt_gener
     )
 
     print(f"YOLO prompts saved to: {yolo_prompt_output_path}")
-
-    if len(yolo_detections) > 0:
-        first_detection = yolo_detections[0]
-
-        print("First YOLO detection:")
-        print(f"  Class ID: {first_detection['class_id']}")
-        print(f"  Class name: {first_detection['class_name']}")
-        print(f"  Confidence: {first_detection['confidence']:.3f}")
-        print(f"  Patch bbox: {first_detection['bbox_patch']}")
-        print(f"  Global bbox: {first_detection['bbox_global']}")
     # Step 3: SAM segmentation
-    print("[3/4] Running SAM segmentation...")
+    print("Running SAM segmentation")
 
     sam_mask_predictions = sam_segmenter.segment_patches(
         patches=patches,
@@ -138,18 +122,8 @@ def run_pipeline_for_image(image_path, config, output_folders, yolo_prompt_gener
 
     print(f"SAM generated {len(sam_mask_predictions)} mask predictions.")
 
-    if len(sam_mask_predictions) > 0:
-        first_mask = sam_mask_predictions[0]
-
-        print("First SAM mask:")
-        print(f"  Class ID: {first_mask['class_id']}")
-        print(f"  Class name: {first_mask['class_name']}")
-        print(f"  YOLO confidence: {first_mask['yolo_confidence']:.3f}")
-        print(f"  SAM IoU score: {first_mask['sam_iou_score']:.3f}")
-        print(f"  Mask shape: {first_mask['mask_patch'].shape}")
-
         # Step 4: unpatching/stitching
-    print("[4/4] Stitching masks and saving outputs...")
+    print("Stitching masks and saving outputs")
 
     class_to_pixel_value = config.get(
         "mask_encoding",

@@ -48,39 +48,6 @@ def create_image_patches(
     patch_output_dir=None,
     padding_value=0
 ):
-    """
-    Create image patches for inference.
-
-    Parameters
-    ----------
-    image_path : str or Path
-        Path to the input image.
-
-    patch_size : int
-        Size of each square patch, for example 512.
-
-    stride : int
-        Stride between patches, for example 256.
-
-    save_patches : bool
-        If True, patch images are saved to disk.
-        If False, patches are kept only in memory.
-
-    patch_output_dir : str or Path
-        Directory where patches should be saved if save_patches=True.
-
-    padding_value : int
-        Value used for padding if the image is smaller than patch size.
-
-    Returns
-    -------
-    patches : list
-        List of patch dictionaries. Each dictionary contains patch image array and coordinates.
-
-    metadata : dict
-        Metadata needed later for unpatching/stitching.
-    """
-
     image_path = Path(image_path)
 
     image = Image.open(image_path).convert("RGB")
