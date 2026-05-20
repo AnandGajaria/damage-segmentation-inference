@@ -21,9 +21,11 @@ yolo:
   image_size: 512
 
 sam:
-  model_path: "models/sam/sam_finetuned.pth"
-  model_type: "vit_l"
+  base_model_name: "facebook/sam-vit-large"
+  checkpoint_path: "models/sam/sam_finetuned.pth"
   device: "auto"
+  min_iou: 0.5
+  bin_thresh: 0.5
 
 classes:
   0: "Damaged Wall"

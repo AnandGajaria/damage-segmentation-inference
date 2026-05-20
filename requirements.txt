@@ -4,3 +4,5 @@ numpy
 ultralytics
 torch
 opencv-python
+transformers
+torch
