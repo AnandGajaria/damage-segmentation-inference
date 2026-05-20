@@ -2,6 +2,7 @@ import argparse
 import os
 from pathlib import Path
 from src.patching import create_image_patches
+from src.sam_inference import SAMSegmenter
 
 from src.utils import (
     PROJECT_ROOT,
@@ -44,7 +45,7 @@ def collect_input_images(input_path, supported_formats):
 
     raise FileNotFoundError(f"Input path does not exist: {input_path}")
 
-def run_pipeline_for_image(image_path, config, output_folders, yolo_prompt_generator):
+def run_pipeline_for_image(image_path, config, output_folders, yolo_prompt_generator, sam_segmenter):
     """
     Main pipeline for one image.
 
@@ -123,7 +124,25 @@ def run_pipeline_for_image(image_path, config, output_folders, yolo_prompt_gener
         print(f"  Patch bbox: {first_detection['bbox_patch']}")
         print(f"  Global bbox: {first_detection['bbox_global']}")
     # Step 3: SAM segmentation
-    print("[3/4] Running SAM segmentation... not implemented yet")
+# Step 3: SAM segmentation
+print("[3/4] Running SAM segmentation...")
+
+sam_mask_predictions = sam_segmenter.segment_patches(
+    patches=patches,
+    yolo_detections=yolo_detections
+)
+
+print(f"SAM generated {len(sam_mask_predictions)} mask predictions.")
+
+if len(sam_mask_predictions) > 0:
+    first_mask = sam_mask_predictions[0]
+
+    print("First SAM mask:")
+    print(f"  Class ID: {first_mask['class_id']}")
+    print(f"  Class name: {first_mask['class_name']}")
+    print(f"  YOLO confidence: {first_mask['yolo_confidence']:.3f}")
+    print(f"  SAM IoU score: {first_mask['sam_iou_score']:.3f}")
+    print(f"  Mask shape: {first_mask['mask_patch'].shape}")
 
     # Step 4: unpatching/stitching
     print("[4/4] Stitching masks and saving outputs... not implemented yet")
@@ -182,12 +201,23 @@ def main():
         class_names=config["classes"]
     )
 
+    sam_config = config["sam"]
+
+    sam_segmenter = SAMSegmenter(
+        base_model_name=sam_config["base_model_name"],
+        checkpoint_path=sam_config["checkpoint_path"],
+        device=sam_config.get("device", "auto"),
+        min_iou=sam_config.get("min_iou", 0.5),
+        bin_thresh=sam_config.get("bin_thresh", 0.5)
+    )
+
     for image_path in image_paths:
         run_pipeline_for_image(
-            image_path=image_path,
-            config=config,
-            output_folders=output_folders,
-            yolo_prompt_generator=yolo_prompt_generator
-        )
+        image_path=image_path,
+        config=config,
+        output_folders=output_folders,
+        yolo_prompt_generator=yolo_prompt_generator,
+        sam_segmenter=sam_segmenter
+    )
 if __name__ == "__main__":
     main()

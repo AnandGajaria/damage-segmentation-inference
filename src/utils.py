@@ -61,20 +61,16 @@ def load_config(config_path=None):
 def resolve_config_paths(config):
     """
     Convert relative paths inside config.yaml into absolute paths.
-
-    This prevents path problems in Colab, Windows, or any other environment.
     """
 
-    # YOLO model path
     if "yolo" in config and "model_path" in config["yolo"]:
         config["yolo"]["model_path"] = str(
             resolve_path(config["yolo"]["model_path"])
         )
 
-    # SAM model path
-    if "sam" in config and "model_path" in config["sam"]:
-        config["sam"]["model_path"] = str(
-            resolve_path(config["sam"]["model_path"])
+    if "sam" in config and "checkpoint_path" in config["sam"]:
+        config["sam"]["checkpoint_path"] = str(
+            resolve_path(config["sam"]["checkpoint_path"])
         )
 
     return config
