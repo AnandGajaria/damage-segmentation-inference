@@ -176,6 +176,16 @@ def run_pipeline_for_image(image_path, config, output_folders, yolo_prompt_gener
     print(f"JSON saved to: {json_output_path}")
     print(f"Finished pipeline for: {image_path.name}")
 
+    return {
+        "image_name": image_path.name,
+        "full_mask_path": full_mask_path,
+        "overlay_path": overlay_path,
+        "json_output_path": json_output_path,
+        "num_patches": len(patches),
+        "num_yolo_detections": len(yolo_detections),
+        "num_sam_masks": len(sam_mask_predictions)
+    }
+
 def main():
     parser = argparse.ArgumentParser(
         description="Damage segmentation inference pipeline"
