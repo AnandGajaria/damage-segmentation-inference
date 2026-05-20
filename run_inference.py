@@ -124,30 +124,29 @@ def run_pipeline_for_image(image_path, config, output_folders, yolo_prompt_gener
         print(f"  Patch bbox: {first_detection['bbox_patch']}")
         print(f"  Global bbox: {first_detection['bbox_global']}")
     # Step 3: SAM segmentation
-# Step 3: SAM segmentation
-print("[3/4] Running SAM segmentation...")
+    print("[3/4] Running SAM segmentation...")
 
-sam_mask_predictions = sam_segmenter.segment_patches(
-    patches=patches,
-    yolo_detections=yolo_detections
-)
+    sam_mask_predictions = sam_segmenter.segment_patches(
+        patches=patches,
+        yolo_detections=yolo_detections
+    )
 
-print(f"SAM generated {len(sam_mask_predictions)} mask predictions.")
+    print(f"SAM generated {len(sam_mask_predictions)} mask predictions.")
 
-if len(sam_mask_predictions) > 0:
-    first_mask = sam_mask_predictions[0]
+    if len(sam_mask_predictions) > 0:
+        first_mask = sam_mask_predictions[0]
 
-    print("First SAM mask:")
-    print(f"  Class ID: {first_mask['class_id']}")
-    print(f"  Class name: {first_mask['class_name']}")
-    print(f"  YOLO confidence: {first_mask['yolo_confidence']:.3f}")
-    print(f"  SAM IoU score: {first_mask['sam_iou_score']:.3f}")
-    print(f"  Mask shape: {first_mask['mask_patch'].shape}")
+        print("First SAM mask:")
+        print(f"  Class ID: {first_mask['class_id']}")
+        print(f"  Class name: {first_mask['class_name']}")
+        print(f"  YOLO confidence: {first_mask['yolo_confidence']:.3f}")
+        print(f"  SAM IoU score: {first_mask['sam_iou_score']:.3f}")
+        print(f"  Mask shape: {first_mask['mask_patch'].shape}")
 
-    # Step 4: unpatching/stitching
-    print("[4/4] Stitching masks and saving outputs... not implemented yet")
+        # Step 4: unpatching/stitching
+        print("[4/4] Stitching masks and saving outputs... not implemented yet")
 
-    print(f"Finished placeholder pipeline for: {image_path.name}")
+        print(f"Finished placeholder pipeline for: {image_path.name}")
 
 def main():
     parser = argparse.ArgumentParser(
@@ -190,6 +189,7 @@ def main():
 
     print(f"Found {len(image_paths)} image(s) for inference.")
 
+    # Create YOLO prompt generator
     yolo_config = config["yolo"]
 
     yolo_prompt_generator = YOLOPromptGenerator(
@@ -201,6 +201,7 @@ def main():
         class_names=config["classes"]
     )
 
+    # Create SAM segmenter
     sam_config = config["sam"]
 
     sam_segmenter = SAMSegmenter(
@@ -213,11 +214,11 @@ def main():
 
     for image_path in image_paths:
         run_pipeline_for_image(
-        image_path=image_path,
-        config=config,
-        output_folders=output_folders,
-        yolo_prompt_generator=yolo_prompt_generator,
-        sam_segmenter=sam_segmenter
-    )
+            image_path=image_path,
+            config=config,
+            output_folders=output_folders,
+            yolo_prompt_generator=yolo_prompt_generator,
+            sam_segmenter=sam_segmenter
+        )
 if __name__ == "__main__":
     main()
