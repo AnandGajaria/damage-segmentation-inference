@@ -13,6 +13,11 @@ from src.utils import (
     resolve_input_path
 )
 
+from src.unpatching import (
+    stitch_sam_masks,
+    create_overlay,
+    save_final_predictions_json
+)
 from src.patching import create_image_patches
 from src.yolo_prompt_generator import YOLOPromptGenerator, save_yolo_prompts
 
@@ -144,9 +149,58 @@ def run_pipeline_for_image(image_path, config, output_folders, yolo_prompt_gener
         print(f"  Mask shape: {first_mask['mask_patch'].shape}")
 
         # Step 4: unpatching/stitching
-        print("[4/4] Stitching masks and saving outputs... not implemented yet")
+    print("[4/4] Stitching masks and saving outputs...")
 
-        print(f"Finished placeholder pipeline for: {image_path.name}")
+    class_to_pixel_value = config.get(
+        "mask_encoding",
+        {}
+    ).get(
+        "class_to_pixel_value",
+        {0: 1, 1: 2, 2: 3}
+    )
+
+    full_mask_path = os.path.join(
+        output_folders["masks"],
+        f"{image_path.stem}_full_mask.png"
+    )
+
+    overlay_path = os.path.join(
+        output_folders["overlays"],
+        f"{image_path.stem}_overlay.png"
+    )
+
+    json_output_path = os.path.join(
+        output_folders["json"],
+        f"{image_path.stem}_predictions.json"
+    )
+
+    full_mask = stitch_sam_masks(
+        sam_mask_predictions=sam_mask_predictions,
+        patch_metadata=patch_metadata,
+        output_mask_path=full_mask_path,
+        class_to_pixel_value=class_to_pixel_value
+    )
+
+    create_overlay(
+        image_path=image_path,
+        full_mask=full_mask,
+        output_overlay_path=overlay_path
+    )
+
+    save_final_predictions_json(
+        image_name=image_path.name,
+        patch_metadata=patch_metadata,
+        sam_mask_predictions=sam_mask_predictions,
+        output_json_path=json_output_path,
+        full_mask_path=full_mask_path,
+        overlay_path=overlay_path,
+        class_to_pixel_value=class_to_pixel_value
+    )
+
+    print(f"Full mask saved to: {full_mask_path}")
+    print(f"Overlay saved to: {overlay_path}")
+    print(f"JSON saved to: {json_output_path}")
+    print(f"Finished pipeline for: {image_path.name}")
 
 def main():
     parser = argparse.ArgumentParser(
