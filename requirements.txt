@@ -6,3 +6,6 @@ torch
 opencv-python
 transformers
 torch
+fastapi
+uvicorn
+python-multipart
