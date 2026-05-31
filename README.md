@@ -176,81 +176,72 @@ mask_encoding:
 
 ## 6. Installation
 
-Create and activate a Python environment.
-
-### Windows PowerShell
-
-```powershell
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-### Linux / Colab / Server
-
-```bash
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
-
-For Google Colab, you can directly run:
-
 ```bash
 pip install -r requirements.txt
 ```
 
 ---
-
 ## 7. Running inference
 
-### Process one image
+There are two ways to run inference: via the API server (recommended for frontend integration) or via the CLI (for local testing and batch processing).
 
-```bash
-python run_inference.py --input sample_data/input_images/4.jpg --output outputs
+### Option A: Start the API server (recommended)
+
+Start the server using Python's subprocess so it runs in the background:
+
+```python
+import subprocess, time
+
+proc = subprocess.Popen(
+    ["python", "-m", "uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"],
+    stdout=open("api.log", "w"),
+    stderr=subprocess.STDOUT
+)
+
+print(f"Server PID: {proc.pid}")
+time.sleep(8)  # wait for models to load
+print("Server ready")
 ```
 
-This processes only `4.jpg`.
+Check the server is running:
 
-### Process all images in a folder
-
-```bash
-python run_inference.py --input sample_data/input_images --output outputs
+```python
+with open("api.log") as f:
+    print(f.read())
 ```
 
-This processes every supported image inside the folder.
+Test the health endpoint:
 
-Supported formats:
+```python
+import requests
 
-```text
-.jpg
-.jpeg
-.png
+resp = requests.get("http://127.0.0.1:8000/health")
+print(resp.status_code, resp.json())
 ```
 
+Expected response:
+
+```json
+{"status": "ok", "service": "damage-segmentation-api"}
+```
+
+Run inference on an image:
+
+```python
+import requests
+
+with open("sample_data/input_images/4.jpg", "rb") as f:
+    resp = requests.post(
+        "http://127.0.0.1:8000/predict",
+        files={"file": ("4.jpg", f, "image/jpeg")}
+    )
+
+print(resp.status_code)
+print(resp.json())
+```
 ---
 
-## 8. Important behavior when using folders
-
-If you run:
-
-```bash
-python run_inference.py --input sample_data/input_images --output outputs
-```
-
-the pipeline will process all images in that folder again.
-
-If you only want to process one new image, use the exact image path:
-
-```bash
-python run_inference.py --input sample_data/input_images/new_image.jpg --output outputs
-```
-
-For frontend/backend integration, the expected usage is usually one uploaded image at a time.
-
----
-
-## 9. Output files
+## 8. Output files
 
 For an input image named:
 
@@ -287,7 +278,7 @@ outputs/
 
 ---
 
-## 10. JSON output format
+## 9. JSON output format
 
 Example:
 
@@ -329,61 +320,3 @@ The frontend can use this file to display:
 ```
 
 ---
-
-## 11. Running on Google Colab
-
-Clone the repository:
-
-```bash
-git clone <your-repo-url>
-cd damage-segmentation-inference
-```
-
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-Check GPU:
-
-```bash
-nvidia-smi
-```
-
-Copy model files into the expected folders:
-
-```bash
-cp /content/drive/MyDrive/models/best.pt models/yolo/best.pt
-cp /content/drive/MyDrive/models/sam_finetuned.pth models/sam/sam_finetuned.pth
-```
-
-Run inference:
-
-```bash
-python run_inference.py --input sample_data/input_images --output outputs
-```
-
----
-
-## 12. Path handling
-
-The package is project-root aware.
-
-This means paths in `config.yaml` can stay relative:
-
-```yaml
-model_path: "models/yolo/best.pt"
-checkpoint_path: "models/sam/sam_finetuned.pth"
-```
-
-You do not need to hardcode paths like:
-
-```text
-/content/damage-segmentation-inference/models/yolo/best.pt
-```
-
-The code resolves relative paths automatically based on the project root.
-
----
-
