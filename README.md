@@ -183,9 +183,9 @@ pip install -r requirements.txt
 ---
 ## 7. Running inference
 
-There are two ways to run inference: via the API server (recommended for frontend integration) or via the CLI (for local testing and batch processing).
+Run inference: via the API server.
 
-### Option A: Start the API server (recommended)
+### Start the API server
 
 Start the server using Python's subprocess so it runs in the background:
 
@@ -300,23 +300,9 @@ Example:
             "yolo_confidence": 0.812,
             "sam_iou_score": 0.934,
             "bbox_global": [120, 80, 340, 300],
-            "bbox_patch": [120, 80, 340, 300],
-            "area_pixels_patch": 18420
+            "bbox_patch": [120, 80, 340, 300]
         }
     ]
 }
 ```
-
-The frontend can use this file to display:
-
-```text
-- class name
-- class ID
-- confidence score
-- bounding box
-- mask path
-- overlay path
-- area information
-```
-
 ---

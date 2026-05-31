@@ -149,7 +149,7 @@ def save_final_predictions_json(
 
     for idx, prediction in enumerate(sam_mask_predictions):
         mask_patch = prediction["mask_patch"]
-        area_pixels = int(mask_patch.sum())
+        #area_pixels = int(mask_patch.sum())
 
         predictions.append({
             "prediction_id": idx,
@@ -163,7 +163,7 @@ def save_final_predictions_json(
             "sam_iou_score": float(prediction["sam_iou_score"]),
             "bbox_global": prediction["bbox_global"],
             "bbox_patch": prediction["bbox_patch"],
-            "area_pixels_patch": area_pixels
+            #"area_pixels_patch": area_pixels
         })
 
     output = {
