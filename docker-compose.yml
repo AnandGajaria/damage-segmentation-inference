@@ -1,0 +1,17 @@
+services:
+  damage-segmentation-api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/app/models
+      - ./api_uploads:/app/api_uploads
+      - ./api_outputs:/app/api_outputs
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped

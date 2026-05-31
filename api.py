@@ -3,6 +3,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 
 from src.utils import (
     PROJECT_ROOT,
@@ -20,6 +21,14 @@ app = FastAPI(
     title="Damage Segmentation API",
     description="API wrapper for YOLOv8 + SAM damage segmentation inference",
     version="1.0.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
